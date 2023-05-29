@@ -3,7 +3,7 @@ version: 1
 
 indices:
  default:
-    target: /query-index.xlsx
+    target: /query-index
     properties:
       title:
          select: head > meta[property="og:title"]
