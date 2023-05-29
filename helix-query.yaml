@@ -1,1 +1,12 @@
-
+version: 1
+indices:
+default:
+target: /sitemap-index.xlsx
+properties:
+title:
+select: head > meta[property="og:title"]
+value : attribute(el,"content") 
+image:
+description:
+lastModified:
+robots:
