@@ -2,7 +2,12 @@ version: 1
 
 indices: 
   default:
-  developer:
-     target: /query-index.xlsx
-     include: /index/*
+     target: /query-index
      properties:
+      path: 
+      title:
+         select: head > meta[property="og:title"]
+         value: attribute(el, "content")
+      image:
+      description:
+      lastModified: 
