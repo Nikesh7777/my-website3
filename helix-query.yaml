@@ -1,0 +1,7 @@
+verison: 1
+
+indices: 
+   form: 
+      target: /email-form.xslx
+      include: /my-website3/*
+      properties: 
