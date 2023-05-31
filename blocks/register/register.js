@@ -20,7 +20,7 @@ function createSelect(fd) {
     return select;
   }
   
-  function constructPayload(register) {
+  function constructPayload(form) {
     const payload = {};
     [...form.elements].forEach((fe) => {
       if (fe.type === 'checkbox') {
@@ -32,9 +32,9 @@ function createSelect(fd) {
     return payload;
   }
   
-  async function submitForm(register) {
-    const payload = constructPayload(register);
-    const resp = await fetch(register.dataset.action, {
+  async function submitForm(form) {
+    const payload = constructPayload(form);
+    const resp = await fetch(form.dataset.action, {
       method: 'POST',
       cache: 'no-cache',
       headers: {
@@ -52,12 +52,12 @@ function createSelect(fd) {
     button.classList.add('button');
     if (fd.Type === 'submit') {
       button.addEventListener('click', async (event) => {
-        const register = button.closest('register');
-        if (fd.Placeholder) register.dataset.action = fd.Placeholder;
-        if (register.checkValidity()) {
+        const form = button.closest('form');
+        if (fd.Placeholder) form.dataset.action = fd.Placeholder;
+        if (form.checkValidity()) {
           event.preventDefault();
           button.setAttribute('disabled', '');
-          await submitForm(register);
+          await submitForm(form);
           const redirectTo = fd.Extra;
           window.location.href = redirectTo;
         }
@@ -103,23 +103,23 @@ function createSelect(fd) {
     return label;
   }
   
-  function applyRules(register, rules) {
+  function applyRules(form, rules) {
     const payload = constructPayload(form);
     rules.forEach((field) => {
       const { type, condition: { key, operator, value } } = field.rule;
       if (type === 'visible') {
         if (operator === 'eq') {
           if (payload[key] === value) {
-            register.querySelector(`.${field.fieldId}`).classList.remove('hidden');
+            form.querySelector(`.${field.fieldId}`).classList.remove('hidden');
           } else {
-            register.querySelector(`.${field.fieldId}`).classList.add('hidden');
+            form.querySelector(`.${field.fieldId}`).classList.add('hidden');
           }
         }
       }
     });
   }
   
-  function fill(register) {
+  function fill(form) {
     const { action } = form.dataset;
     if (action === '/tools/bot/register-form') {
       const loc = new URL(window.location.href);
@@ -128,19 +128,19 @@ function createSelect(fd) {
     }
   }
   
-  async function createForm(registerURL) {
-    const { pathname } = new URL(registerURL);
+  async function createForm(formURL) {
+    const { pathname } = new URL(formURL);
     const resp = await fetch(pathname);
     const json = await resp.json();
-    const register = document.createElement('register');
+    const form = document.createElement('form');
     const rules = [];
     // eslint-disable-next-line prefer-destructuring
-    register.dataset.action = pathname.split('.json')[0];
+    form.dataset.action = pathname.split('.json')[0];
     json.data.forEach((fd) => {
       fd.Type = fd.Type || 'text';
       const fieldWrapper = document.createElement('div');
-      const style = fd.Style ? ` register-${fd.Style}` : '';
-      const fieldId = `register-${fd.Type}-wrapper${style}`;
+      const style = fd.Style ? ` form-${fd.Style}` : '';
+      const fieldId = `form-${fd.Type}-wrapper${style}`;
       fieldWrapper.className = fieldId;
       fieldWrapper.classList.add('field-wrapper');
       switch (fd.Type) {
@@ -175,18 +175,18 @@ function createSelect(fd) {
           console.warn(`Invalid Rule ${fd.Rules}: ${e}`);
         }
       }
-      register.append(fieldWrapper);
+      form.append(fieldWrapper);
     });
   
-    register.addEventListener('change', () => applyRules(form, rules));
-    applyRules(register, rules);
-    fill(register);
-    return (register);
+    form.addEventListener('change', () => applyRules(form, rules));
+    applyRules(form, rules);
+    fill(form);
+    return (form);
   }
   
   export default async function decorate(block) {
-    const register = block.querySelector('a[href$=".json"]');
-    if (register) {
-      register.replaceWith(await createForm(register.href));
+    const form = block.querySelector('a[href$=".json"]');
+    if (form) {
+      form.replaceWith(await createForm(form.href));
     }
   }
